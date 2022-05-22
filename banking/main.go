@@ -3,10 +3,16 @@ package main
 import (
 	"fmt"
 
-	"github.com/ttaehyun/gonomad/banking/banking_module"
+	"github.com/ttaehyun/gonomad/banking/accounts"
 )
 
 func main() {
-	account := banking.Account{Owner: "me", Balance: 100}
-	fmt.Println(account)
+	account := accounts.NewAccount("nico")
+	account.Deposit(10)
+	fmt.Println(account.Balance())
+	err := account.Withdraw(20)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(account.Balance())
 }
