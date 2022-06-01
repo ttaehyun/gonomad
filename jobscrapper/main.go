@@ -14,20 +14,26 @@ type extractedJob struct {
 	id       string
 	title    string
 	location string
-	salary   string
 	summary  string
 }
 
 var baseURL string = "https://kr.indeed.com/jobs?q=python&limit=50"
 
 func main() {
+	var jobs []extractedJob
 	totalPages := getPages()
 	for i := 0; i < totalPages; i++ {
-		getPage(i)
+		extractedjobs := getPage(i)
+		jobs = append(jobs, extractedjobs...)
 	}
+	for _, pt_jobs := range jobs {
+		fmt.Println(pt_jobs)
+	}
+	//fmt.Println(jobs)
 }
 
-func getPage(page int) {
+func getPage(page int) []extractedJob {
+	var jobs_array []extractedJob
 	pageURL := baseURL + "&start=" + strconv.Itoa(page*50)
 	fmt.Println("Requesting", pageURL)
 	res, err := http.Get(pageURL)
@@ -39,19 +45,26 @@ func getPage(page int) {
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	checkErr(err)
 
-	//searchCards := doc.Find(".cardOutline")
-	idValue := doc.Find(".jobTitle")
+	searchCards := doc.Find(".cardOutline")
 
-	idValue.Each(func(i int, card *goquery.Selection) {
-		id, _ := card.Attr("data-jk")
-		fmt.Println(id)
+	searchCards.Each(func(i int, card *goquery.Selection) {
+		job := extractJob(card)
+		jobs_array = append(jobs_array, job)
 	})
+	return jobs_array
+}
 
-	//searchCards.Each(func(i int, card *goquery.Selection) {
-	//title := cleanCode(card.Find(".jobTitle>a").Text())
-	//location := cleanCode(card.Find(".heading6").Text())
-	//fmt.Println(title,location)
-	//})
+func extractJob(card *goquery.Selection) extractedJob {
+	id, _ := card.Find(".jobTitle>a").Attr("data-jk")
+	title, _ := card.Find(".jobTitle>a>span").Attr("title")
+	location := cleanString(card.Find(".companyLocation").Text())
+	summary := cleanString(card.Find(".job-snippet").Text())
+	return extractedJob{
+		id:       id,
+		title:    title,
+		location: location,
+		summary:  summary,
+	}
 }
 
 func getPages() int {
@@ -81,6 +94,6 @@ func checkCode(res *http.Response) {
 	}
 }
 
-func cleanCode(str string) string {
+func cleanString(str string) string {
 	return strings.Join(strings.Fields(strings.TrimSpace(str)), " ")
 }
