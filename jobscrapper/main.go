@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -38,14 +39,19 @@ func getPage(page int) {
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	checkErr(err)
 
-	searchCards := doc.Find(".jobsearch-ResultsList")
+	//searchCards := doc.Find(".cardOutline")
+	idValue := doc.Find(".jobTitle")
 
-	searchCards.Each(func(i int, card *goquery.Selection) {
+	idValue.Each(func(i int, card *goquery.Selection) {
 		id, _ := card.Attr("data-jk")
-		title := card.Find(".jobTitle>a").Text()
-		location := card.Find(".heading6 company_location tapItem-gutter companyInfo").Text()
-		fmt.Println(id, title, location)
+		fmt.Println(id)
 	})
+
+	//searchCards.Each(func(i int, card *goquery.Selection) {
+	//title := cleanCode(card.Find(".jobTitle>a").Text())
+	//location := cleanCode(card.Find(".heading6").Text())
+	//fmt.Println(title,location)
+	//})
 }
 
 func getPages() int {
@@ -73,4 +79,8 @@ func checkCode(res *http.Response) {
 	if res.StatusCode != 200 {
 		log.Fatalln("Request failed with Status: ", res.StatusCode)
 	}
+}
+
+func cleanCode(str string) string {
+	return strings.Join(strings.Fields(strings.TrimSpace(str)), " ")
 }
