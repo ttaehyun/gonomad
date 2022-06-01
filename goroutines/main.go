@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fnt"
+	"fmt"
 	"time"
 )
 
@@ -12,7 +12,7 @@ func main() {
 		go isSexy(person, c)
 	}
 	for i := 0; i < len(people); i++ {
-		fnt.Println(<-c)
+		fmt.Println(<-c)
 	}
 }
 
